@@ -12,6 +12,7 @@ class MLP {
     int ocultas;
     int saidas;
     double taxa_aprendizado;
+    int epocas;
 
     vector<vector<double>> pesos_entradas_para_ocultas;
     vector<vector<double>> pesos_ocultas_para_saidas;
@@ -22,7 +23,7 @@ class MLP {
     std::mt19937 rng;
 
   public:
-    MLP(int entradas, int ocultas, int saidas, double taxa_aprendizado)
+    MLP(int entradas, int ocultas, int saidas, double taxa_aprendizado, int epocas)
         : entradas(entradas), ocultas(ocultas), saidas(saidas), taxa_aprendizado(taxa_aprendizado)
     {
         this->rng.seed((unsigned) chrono::high_resolution_clock::now().time_since_epoch().count());
@@ -31,6 +32,7 @@ class MLP {
         this->pesos_ocultas_para_saidas.assign(ocultas, vector<double>(saidas));
         this->bias_ocultas.assign(ocultas, 0.0);
         this->bias_saidas.assign(saidas, 0.0);
+        this->epocas = epocas;
 
         this->inicializar_pesos();
     }
@@ -147,19 +149,30 @@ class MLP {
       const vector<double>& gradiente_saida ,
       const vector<double>& gradiente_oculta) {
       
+      // correção de pesos para as camadas ocultas
       for (int j = 0; j < ocultas.size(); j++) {
-        for (int i = 0; i < saidas; i++) {
-          double gradiente = erros[i] * sigmoid_derivada(ocultas[j]);
-          pesos_ocultas_para_saidas[j][i] += taxa_aprendizado * gradiente * ocultas[j];
+        for (int k = 0; k < saidas; k++) {
+          double ajuste_peso = taxa_aprendizado * gradiente_saida[k];
+          
+          pesos_ocultas_para_saidas[j][k] += ajuste_peso;
+        }
+        
+        // atualiza bias
+        bias_saidas[j] += taxa_aprendizado * gradiente_saida[j];
+      }
+
+      // correção de pesos para as camadas8 de entrada
+      for (int i = 0; i < entradas.size(); i++) {
+        for (int j = 0; j < ocultas.size(); j++) {
+          double ajuste_peso = taxa_aprendizado * gradiente_oculta[j];
+          
+          pesos_entradas_para_ocultas[j][i] += ajuste_peso;
         }
       }
 
-      for (int j = 0; j < entradas.size(); j++) {
-        for (int i = 0; i < ocultas.size(); i++) {
-          double gradiente = gradiente_oculta[i] * sigmoid_derivada(entradas[j]);
-          pesos_entradas_para_ocultas[j][i] += taxa_aprendizado * gradiente * entradas[j];
-        }
-      }
+      // Ajusta o bias para cada camada oculta
+      for (int j = 0; j < ocultas.size(); j++) 
+        bias_ocultas[j] += taxa_aprendizado * gradiente_oculta[j];
     }
 
     // 5 - função de calculo do erro
