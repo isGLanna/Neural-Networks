@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build (debug)",
+      "icon": {
+        "color": "terminal.ansiRed",
+        "id": "tools"
+      },
+      "detail": "Compile c++ code for debugging",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "src/**.cpp",
+        "-g", "-O0",
+        "-fdiagnostics-color=always",
+        "-std=c++26",
+        "-I", "include/",
+        "-L", "lib/",
+        "-o", "bin/debug/${workspaceFolderBasename}.exe"
+      ],
+      "problemMatcher": "$gcc",
+      "group": "build"
+    },
+    {
+      "label": "build (release)",
+      "icon": {
+        "color": "terminal.ansiGreen",
+        "id": "tools"
+      },
+      "detail": "Compile c++ code for optimal performance",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "src/**.cpp",
+        "-fdiagnostics-color=always",
+        "-std=c++26",
+        "-I", "include/",
+        "-L", "lib/",
+        "-o", "bin/release/${workspaceFolderBasename}.exe"
+      ],
+      "problemMatcher": "$gcc",
+      "group": "build",
+    },
+  ]
+}
